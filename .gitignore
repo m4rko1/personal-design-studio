@@ -1,0 +1,9 @@
+.agents/
+.codex/
+work/
+*.log
+*.err
+*.out
+.DS_Store
+Thumbs.db
+
