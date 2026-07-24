@@ -1,0 +1,2963 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Personal Design Studio</title>
+  <style>
+    :root {
+      --ink: #171717;
+      --muted: #6f6f6f;
+      --line: #dededb;
+      --line-strong: #c9c9c5;
+      --paper: #f5f5f2;
+      --panel: #ffffff;
+      --soft: #ecece8;
+      --mint: #c6f15c;
+      --coral: #ff6b55;
+      --blue: #3478f6;
+      --yellow: #f3c64e;
+      --shadow: 0 12px 30px rgba(20, 20, 20, .09);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      letter-spacing: 0;
+    }
+
+    body { display: flex; flex-direction: column; }
+
+    button, input, textarea { font: inherit; letter-spacing: 0; }
+    button { color: inherit; }
+    .file-input { display: none; }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 400px;
+      grid-template-rows: 48px minmax(0, 1fr);
+      height: 100%;
+      min-height: 620px;
+      background: var(--paper);
+    }
+
+    .topbar {
+      grid-column: 1;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+      z-index: 20;
+    }
+
+    .brand { display: none; }
+
+    .project-head::before {
+      content: "PD";
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      color: white;
+      background: var(--ink);
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      color: white;
+      background: var(--ink);
+      border-radius: 50%;
+      font-size: 11px;
+    }
+
+    .project-head {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      padding: 0 14px;
+    }
+
+    .project-name {
+      min-width: 120px;
+      max-width: 260px;
+      border: 0;
+      outline: 0;
+      padding: 3px 2px;
+      background: transparent;
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #46af55;
+      box-shadow: 0 0 0 3px #e5f5e7;
+    }
+
+    .saved {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .top-actions {
+      grid-column: 2;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 0 12px;
+      border-left: 1px solid var(--line);
+    }
+
+    .credits {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-right: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .credits b { color: var(--ink); }
+
+    .top-actions .button {
+      width: 30px;
+      min-width: 30px;
+      padding: 0;
+      justify-content: center;
+    }
+
+    .account-button {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      color: white;
+      background: #367af0;
+      cursor: pointer;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .button,
+    .icon-button {
+      height: 30px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, transform .15s ease;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .button:hover,
+    .icon-button:hover { background: var(--soft); border-color: var(--line-strong); }
+    .button:active,
+    .icon-button:active { transform: translateY(1px); }
+
+    .button.dark {
+      color: white;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .button.dark:hover { background: #343434; }
+
+    .icon-button {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      min-width: 30px;
+      padding: 0;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    .leftbar {
+      display: none;
+    }
+
+    .left-section { padding: 14px 12px; }
+    .left-section + .left-section { border-top: 1px solid var(--line); }
+
+    .section-label {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .project-list,
+    .page-list {
+      display: grid;
+      gap: 3px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      min-height: 32px;
+      padding: 6px 8px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .nav-item:hover { background: var(--soft); }
+    .nav-item.active { background: #e7e7e2; font-weight: 650; }
+
+    .nav-icon {
+      display: grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      color: #4f4f4f;
+      border: 1px solid var(--line-strong);
+      border-radius: 4px;
+      font-size: 10px;
+      flex: 0 0 auto;
+    }
+
+    .nav-meta { margin-left: auto; color: #999; font-size: 10px; }
+
+    .mini-art {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .mini-art button {
+      aspect-ratio: 1;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .mini-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: auto;
+      padding: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: #141414;
+      background: var(--mint);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .profile-copy { min-width: 0; }
+    .profile-copy strong { display: block; font-size: 11px; }
+    .profile-copy span { display: block; color: var(--muted); font-size: 10px; }
+
+    .workspace {
+      position: relative;
+      grid-column: 1;
+      grid-row: 2;
+      min-width: 0;
+      overflow: hidden;
+      touch-action: none;
+      background-color: #ededed;
+      background-image: radial-gradient(#d0d0d0 .7px, transparent .7px);
+      background-size: 18px 18px;
+    }
+
+    .workspace.grid-hidden { background-image: none; }
+
+    .canvas-head {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .crumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 28px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .9);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+      font-size: 11px;
+      pointer-events: auto;
+      user-select: none;
+    }
+
+    .canvas-note {
+      color: #858585;
+      font-size: 10px;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .canvas {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 50%;
+      will-change: transform;
+    }
+
+    .workspace.is-panning,
+    .workspace.is-panning * { cursor: grabbing !important; }
+    .workspace.is-panning { user-select: none; }
+    .workspace.is-marquee,
+    .workspace.is-marquee * {
+      cursor: crosshair !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+    }
+
+    .board {
+      position: absolute;
+      width: 360px;
+      height: 450px;
+      border: 1px solid #cfcfca;
+      border-radius: 3px;
+      background: white;
+      box-shadow: 0 6px 24px rgba(24, 24, 24, .12);
+      overflow: hidden;
+      user-select: none;
+      cursor: grab;
+    }
+
+    .board:active { cursor: grabbing; }
+    .board.selected { outline: 2px solid var(--blue); outline-offset: 3px; }
+    .board.locked { cursor: default; outline-style: dashed; }
+    .board.image-board {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+    }
+    .board.image-board.selected { outline: 0; }
+    .board.image-board img { display: block; width: 100%; height: 100%; background: transparent !important; object-fit: contain; pointer-events: none; }
+    .image-resize-handle {
+      position: absolute;
+      right: -6px;
+      bottom: -6px;
+      display: none;
+      width: 12px;
+      height: 12px;
+      padding: 0;
+      border: 2px solid white;
+      border-radius: 50%;
+      background: #202020;
+      box-shadow: 0 1px 4px rgba(0,0,0,.22);
+      cursor: nwse-resize;
+      touch-action: none;
+      z-index: 3;
+    }
+    .board.image-board.selected .image-resize-handle { display: block; }
+    .board small.board-title {
+      position: absolute;
+      top: -23px;
+      left: -2px;
+      color: #656565;
+      font-size: 10px;
+      font-weight: 650;
+    }
+
+    .board-main { left: 12%; top: 14%; }
+    .board-secondary { left: 53%; top: 22%; width: 318px; height: 398px; transform: rotate(1deg); }
+
+    .poster {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 54px 1fr 108px;
+      padding: 18px;
+      color: white;
+      background: #18201d;
+    }
+
+    .poster-top,
+    .poster-bottom {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .poster-top strong { font-size: 12px; line-height: 1.05; }
+    .poster-top span { color: #b9c4be; font-size: 8px; text-align: right; }
+
+    .poster-art {
+      position: relative;
+      overflow: hidden;
+      background: var(--mint);
+    }
+
+    .poster-art::before,
+    .poster-art::after {
+      content: "";
+      position: absolute;
+      background: #18201d;
+    }
+
+    .poster-art::before {
+      width: 72%;
+      height: 52%;
+      top: 23%;
+      left: 14%;
+      transform: skew(-14deg);
+    }
+
+    .poster-art::after {
+      width: 30%;
+      height: 130%;
+      top: -15%;
+      left: 48%;
+      background: var(--coral);
+      transform: rotate(24deg);
+    }
+
+    .poster-word {
+      position: absolute;
+      left: 20px;
+      bottom: 14px;
+      z-index: 2;
+      font-size: 44px;
+      font-weight: 850;
+      line-height: .84;
+    }
+
+    .poster-bottom { padding-top: 16px; }
+    .poster-bottom h2 { margin: 0; font-size: 27px; line-height: .95; }
+    .poster-bottom p { width: 110px; margin: 0; color: #aeb8b3; font-size: 8px; line-height: 1.4; }
+
+    .shape-art {
+      display: grid;
+      place-items: center;
+      height: 100%;
+      background: #f6f5ef;
+    }
+
+    .shape-art::before {
+      content: "";
+      display: block;
+      width: 132px;
+      height: 132px;
+      background: var(--coral);
+      box-shadow: 50px 18px 0 -12px var(--blue), -45px -25px 0 -18px var(--mint);
+      transform: rotate(16deg);
+    }
+
+    .sketch-board { background: #fffef7; }
+    .sketch-board canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+
+    .social-post {
+      height: 100%;
+      display: grid;
+      grid-template-rows: 1fr 118px;
+      background: #f8f4e9;
+    }
+
+    .social-image {
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #e85e4d;
+    }
+
+    .social-image .stripe {
+      width: 68%;
+      height: 125%;
+      background: #f5cf58;
+      transform: rotate(-18deg);
+      box-shadow: 52px 0 0 #1f4d3b, -52px 0 0 #e7e5dc;
+    }
+
+    .social-image strong {
+      position: absolute;
+      width: 80%;
+      color: white;
+      font-size: 34px;
+      line-height: .95;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .social-copy { padding: 16px; }
+    .social-copy span { color: var(--coral); font-size: 9px; font-weight: 750; }
+    .social-copy h3 { margin: 7px 0 5px; font-size: 17px; }
+    .social-copy p { margin: 0; color: #6c675e; font-size: 9px; line-height: 1.45; }
+
+    .selection-menu {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: none;
+      align-items: center;
+      gap: 2px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: white;
+      box-shadow: var(--shadow);
+      z-index: 16;
+      will-change: transform;
+    }
+
+    .workspace.has-selection .selection-menu { display: flex; }
+
+    .marquee-selection {
+      position: absolute;
+      display: none;
+      border: 1px solid var(--blue);
+      background: rgba(52, 120, 246, .12);
+      pointer-events: none;
+      z-index: 14;
+    }
+
+    .layer-panel {
+      position: absolute;
+      right: 14px;
+      bottom: 66px;
+      display: none;
+      width: 218px;
+      max-height: min(360px, calc(100% - 140px));
+      overflow: auto;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .97);
+      box-shadow: var(--shadow);
+      z-index: 17;
+    }
+
+    .layer-panel.open { display: block; }
+    .layer-panel-head { padding: 5px 6px 7px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .layer-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 3px; min-height: 34px; padding: 3px; border-radius: 4px; }
+    .layer-row.selected { background: #edf3ff; }
+    .layer-select { overflow: hidden; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 11px; text-align: left; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+    .layer-order { display: grid; place-items: center; width: 24px; height: 24px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); cursor: pointer; }
+    .layer-order:hover { background: var(--soft); color: var(--ink); }
+
+    .canvas-toolbar {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 44px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.96);
+      box-shadow: var(--shadow);
+      transform: translateX(-50%);
+      z-index: 10;
+    }
+
+    .tool-button {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .icon-svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 1.7;
+      pointer-events: none;
+    }
+
+    .composer-tools .icon-svg { width: 15px; height: 15px; }
+    .top-actions .button .icon-svg { width: 14px; height: 14px; }
+
+    .tool-button:hover { background: var(--soft); }
+    .tool-button.active { color: white; background: var(--ink); }
+    .tool-divider { width: 1px; height: 22px; margin: 0 3px; background: var(--line); }
+
+    .tool-button[data-tip]::after,
+    .icon-button[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      padding: 4px 6px;
+      border-radius: 4px;
+      color: white;
+      background: #222;
+      font-size: 9px;
+      line-height: 1;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 3px);
+      transition: opacity .15s ease, transform .15s ease;
+    }
+
+    .tool-button:hover::after,
+    .icon-button:hover::after { opacity: 1; transform: translate(-50%, 0); }
+
+    .zoom-control {
+      position: absolute;
+      left: 18px;
+      bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      height: 28px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      z-index: 10;
+    }
+
+    .zoom-control button {
+      width: 24px;
+      height: 24px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .zoom-control button:hover { background: var(--soft); }
+    .zoom-divider { width: 1px; height: 16px; margin: 0 4px; background: var(--line); }
+    .zoom-control .zoom-label { width: auto; min-width: 38px; color: var(--muted); font-size: 10px; text-align: center; cursor: pointer; }
+
+    .rightbar {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      display: grid;
+      grid-template-rows: 48px minmax(0, 1fr) auto;
+      min-width: 0;
+      overflow: hidden;
+      border-left: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    body.agent-collapsed .app { grid-template-columns: minmax(0, 1fr) 48px; }
+    body.agent-collapsed .agent-head { justify-content: center; padding: 0; }
+    body.agent-collapsed .agent-title,
+    body.agent-collapsed .agent-head-actions button:not(#collapseAgent),
+    body.agent-collapsed .conversation,
+    body.agent-collapsed .composer-wrap { display: none; }
+    body.agent-collapsed #collapseAgent { transform: rotate(180deg); }
+
+    .agent-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .agent-title { display: flex; align-items: center; gap: 8px; }
+    .agent-title strong { font-size: 13px; }
+    .agent-badge {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      color: #36600e;
+      font-size: 9px;
+    }
+
+    .agent-badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 0 2px #ecf8d4;
+    }
+
+    .agent-head-actions { display: flex; gap: 4px; }
+
+    .conversation {
+      overflow-y: auto;
+      padding: 18px 16px 14px;
+    }
+
+    .welcome {
+      display: none;
+    }
+
+    .spark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      margin: 0 auto 10px;
+      border-radius: 50%;
+      color: #24320f;
+      background: var(--mint);
+      font-size: 18px;
+    }
+
+    .welcome h2 { margin: 0 0 7px; font-size: 18px; }
+    .welcome p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+    .skill-label {
+      margin: clamp(210px, 34vh, 390px) 0 14px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 650;
+      text-align: center;
+    }
+
+    .skills { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; }
+
+    .skill-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .skill-chip:hover { border-color: #ababaa; background: #fafaf7; }
+    .skill-dot { width: 8px; height: 8px; border-radius: 2px; background: var(--blue); }
+    .skill-chip:nth-child(2) .skill-dot { background: var(--coral); }
+    .skill-chip:nth-child(3) .skill-dot { background: var(--yellow); }
+    .skill-chip:nth-child(4) .skill-dot { background: #38a875; }
+    .skill-chip:nth-child(5) .skill-dot { background: #222; }
+    .skill-chip:nth-child(6) .skill-dot { background: #db4f8b; }
+    .skill-chip:nth-child(7) .skill-dot { background: #b962df; }
+    .skill-chip:nth-child(8) .skill-dot { background: #9a9a95; }
+
+    .messages { display: grid; gap: 12px; margin-top: 18px; }
+
+    .message {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      animation: pop .2s ease both;
+    }
+
+    .message.user { flex-direction: row-reverse; }
+
+    .message-avatar {
+      display: grid;
+      place-items: center;
+      width: 23px;
+      height: 23px;
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: #f8f8f5;
+      font-size: 9px;
+      font-weight: 750;
+    }
+
+    .message.user .message-avatar { background: var(--ink); color: white; border-color: var(--ink); }
+
+    .bubble {
+      max-width: 82%;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fafaf8;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .message.user .bubble { background: var(--ink); color: white; border-color: var(--ink); }
+    .bubble small { display: block; margin-top: 5px; color: #8b8b87; font-size: 9px; }
+
+    .typing {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      min-width: 52px;
+    }
+
+    .typing i {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #8a8a86;
+      animation: blink 1s infinite ease-in-out;
+    }
+
+    .typing i:nth-child(2) { animation-delay: .16s; }
+    .typing i:nth-child(3) { animation-delay: .32s; }
+
+    .composer-wrap { position: relative; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+
+    .prompt-context {
+      display: none;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 7px;
+    }
+
+    .prompt-context.visible { display: flex; }
+    .context-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      max-width: 132px;
+      min-height: 24px;
+      padding: 4px 8px;
+      border: 1px solid #b9cdf5;
+      border-radius: 7px;
+      color: #2857ae;
+      background: #f7faff;
+      box-shadow: 0 3px 10px rgba(52,120,246,.12);
+      font-size: 9px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+
+    .context-chip::before { content: "@"; font-weight: 800; }
+
+    .mention-menu {
+      position: absolute;
+      z-index: 30;
+      right: 12px;
+      bottom: calc(100% + 2px);
+      left: 12px;
+      display: none;
+      max-height: 230px;
+      overflow: auto;
+      padding: 5px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: rgba(255,255,255,.98);
+      box-shadow: 0 10px 28px rgba(20,20,20,.12);
+    }
+
+    .mention-menu.open { display: grid; gap: 2px; }
+    .mention-menu-empty { padding: 9px; color: var(--muted); font-size: 10px; }
+    .mention-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      padding: 8px 9px;
+      border: 0;
+      border-radius: 5px;
+      color: var(--ink);
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .mention-option:hover,
+    .mention-option.active { background: var(--soft); }
+    .mention-option small { color: var(--muted); font-size: 9px; }
+
+    .selected-skill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      margin-bottom: 7px;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      font-size: 9px;
+    }
+
+    .selected-skill.visible { display: flex; }
+    .selected-skill button { border: 0; padding: 0; background: transparent; cursor: pointer; color: #888; }
+
+    .composer {
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: white;
+      box-shadow: 0 8px 24px rgba(20,20,20,.1);
+    }
+
+    .prompt-preview {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      min-height: 54px;
+      padding: 7px 8px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfbfa;
+    }
+
+    .prompt-preview.visible { display: flex; }
+    .prompt-preview-card {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 54px;
+      height: 42px;
+      overflow: hidden;
+      padding: 2px;
+      border: 1px solid #cbd9f5;
+      border-radius: 6px;
+      background: white;
+      box-shadow: 0 3px 10px rgba(20,20,20,.12);
+      cursor: pointer;
+    }
+
+    .prompt-preview-card img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .prompt-preview-card span {
+      position: absolute;
+      right: 3px;
+      bottom: 2px;
+      max-width: 46px;
+      overflow: hidden;
+      color: white;
+      background: rgba(0,0,0,.58);
+      font-size: 7px;
+      line-height: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cursor-thumbnail {
+      position: fixed;
+      z-index: 100;
+      display: none;
+      width: 108px;
+      height: 82px;
+      padding: 4px;
+      border: 1px solid #cbd9f5;
+      border-radius: 7px;
+      background: rgba(255,255,255,.96);
+      box-shadow: 0 8px 24px rgba(20,20,20,.18);
+      pointer-events: none;
+      transform: translate3d(14px, 14px, 0);
+    }
+
+    .cursor-thumbnail.visible { display: block; }
+    .cursor-thumbnail img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+    .composer textarea {
+      display: block;
+      width: 100%;
+      min-height: 78px;
+      max-height: 142px;
+      resize: none;
+      border: 0;
+      outline: 0;
+      padding: 11px 12px 5px;
+      color: var(--ink);
+      background: transparent;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .composer textarea::placeholder { color: #aaa; }
+
+    .composer-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 6px 6px;
+    }
+
+    .tool-group { display: flex; align-items: center; gap: 2px; }
+
+    .composer-tools button {
+      display: grid;
+      place-items: center;
+      min-width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .composer-tools button:hover { background: var(--soft); }
+
+    .mode-button,
+    .model-button {
+      display: inline-flex !important;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 5px;
+      padding: 0 7px !important;
+      color: #454545;
+      white-space: nowrap;
+      font-size: 10px !important;
+    }
+
+    .send-button {
+      width: 28px;
+      border-radius: 50% !important;
+      color: white;
+      background: var(--ink) !important;
+      font-size: 14px !important;
+    }
+
+    .send-button:disabled { opacity: .35; cursor: not-allowed; }
+
+    .menu,
+    .modal {
+      position: fixed;
+      z-index: 50;
+      display: none;
+      border: 1px solid var(--line);
+      background: white;
+      box-shadow: var(--shadow);
+    }
+
+    .menu.open,
+    .modal.open { display: block; }
+
+    .mode-menu {
+      right: 252px;
+      bottom: 64px;
+      width: 132px;
+      padding: 5px;
+      border-radius: 7px;
+    }
+
+    .menu button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 30px;
+      padding: 0 8px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      text-align: left;
+      font-size: 10px;
+    }
+
+    .menu button:hover,
+    .menu button.active { background: var(--soft); }
+
+    .model-menu {
+      right: 15px;
+      bottom: 64px;
+      width: 320px;
+      max-height: 410px;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    .model-menu-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .model-tabs { display: flex; gap: 3px; padding: 8px; border-bottom: 1px solid var(--line); }
+    .model-tabs button { width: auto; padding: 0 9px; }
+    .model-list { max-height: 316px; overflow-y: auto; padding: 5px; }
+
+    .model-item { height: auto !important; min-height: 48px; padding: 7px 8px !important; }
+    .model-info { min-width: 0; }
+    .model-info strong { display: block; font-size: 10px; }
+    .model-info span { display: block; margin-top: 2px; color: var(--muted); font-size: 8px; line-height: 1.3; }
+    .model-time { color: #888; font-size: 8px; }
+
+    .modal {
+      top: 50%;
+      left: 50%;
+      width: min(440px, calc(100vw - 30px));
+      border-radius: 8px;
+      transform: translate(-50%, -50%);
+    }
+
+    .modal-head,
+    .modal-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 13px;
+    }
+
+    .modal-head { border-bottom: 1px solid var(--line); }
+    .modal-head strong { font-size: 12px; }
+    .modal-body { padding: 14px; }
+
+    .modal-body label {
+      display: grid;
+      gap: 5px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .modal-body input,
+    .modal-body select {
+      height: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: 5px;
+      outline: 0;
+      padding: 0 9px;
+      color: var(--ink);
+      background: white;
+      font-size: 11px;
+    }
+
+    .modal-body input:focus,
+    .modal-body select:focus { border-color: var(--blue); }
+    .api-hint { margin: -2px 0 12px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .modal-body pre { overflow: auto; margin: 0; padding: 10px; border-radius: 5px; color: #eaeaea; background: #202020; font: 9px/1.5 Consolas, monospace; }
+    .modal-foot { border-top: 1px solid var(--line); justify-content: flex-end; gap: 6px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 68px;
+      z-index: 70;
+      display: none;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: white;
+      background: #202020;
+      box-shadow: var(--shadow);
+      font-size: 10px;
+      transform: translateX(-50%);
+    }
+
+    .toast.show { display: block; animation: pop .18s ease both; }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blink {
+      0%, 70%, 100% { opacity: .25; transform: translateY(0); }
+      35% { opacity: 1; transform: translateY(-2px); }
+    }
+
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: minmax(0, 1fr) 340px; }
+      .topbar { grid-template-columns: minmax(0, 1fr) auto; }
+      .workspace { grid-column: 1; }
+      .rightbar { grid-column: 2; }
+      .board-main { left: 7%; }
+      .board-secondary { left: 48%; }
+    }
+
+    @media (max-width: 760px) {
+      html, body { overflow: auto; }
+      .app {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 48px minmax(520px, 64vh) minmax(520px, auto);
+        height: auto;
+        min-height: 100%;
+      }
+      body.agent-collapsed .app { grid-template-columns: 1fr; }
+      .topbar { grid-column: 1; grid-template-columns: minmax(0, 1fr) auto; }
+      .top-actions .credits,
+      .top-actions .button:not(.dark) { display: none; }
+      .project-head { min-width: 0; padding: 0 10px; }
+      .project-name { min-width: 0; width: 150px; }
+      .workspace { grid-column: 1; grid-row: 2; }
+      .rightbar { grid-column: 1; grid-row: 3; min-height: 560px; border-left: 0; border-top: 1px solid var(--line); }
+      .skill-label { margin-top: 54px; }
+      .board { width: 270px; height: 338px; }
+      .board-main { left: 7%; top: 18%; }
+      .board-secondary { left: 54%; top: 28%; width: 230px; height: 290px; }
+      .poster { padding: 12px; grid-template-rows: 38px 1fr 82px; }
+      .poster-word { font-size: 31px; }
+      .poster-bottom h2 { font-size: 20px; }
+      .poster-bottom p { width: 82px; font-size: 6px; }
+      .social-image strong { font-size: 25px; }
+      .mode-menu { right: 230px; bottom: 16px; }
+      .model-menu { right: 10px; bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">PD</span> Personal Studio</div>
+      <div class="project-head">
+        <span class="status-dot" aria-hidden="true"></span>
+        <input class="project-name" id="projectName" value="个人品牌视觉实验" aria-label="项目名称">
+        <span class="saved" id="saveState">已保存</span>
+      </div>
+      <div class="top-actions">
+        <span class="credits" title="本地演示额度"><span>✦</span><b id="creditValue">70</b></span>
+        <button class="account-button" id="accountButton" data-tip="个人账户" aria-label="个人账户">ME</button>
+        <button class="button" id="shareButton" aria-label="分享" data-tip="分享">↗ 分享</button>
+        <button class="button dark" id="exportButton" aria-label="导出" data-tip="导出">⇩ 导出</button>
+      </div>
+    </header>
+
+    <aside class="leftbar" aria-label="项目导航">
+      <section class="left-section">
+        <p class="section-label">Workspace</p>
+        <div class="project-list">
+          <button class="nav-item active"><span class="nav-icon">P</span>个人品牌视觉<span class="nav-meta">3</span></button>
+          <button class="nav-item"><span class="nav-icon">C</span>咖啡包装提案<span class="nav-meta">7</span></button>
+          <button class="nav-item"><span class="nav-icon">S</span>社交内容模板<span class="nav-meta">12</span></button>
+          <button class="nav-item"><span class="nav-icon">+</span>新建项目</button>
+        </div>
+      </section>
+      <section class="left-section">
+        <p class="section-label">Current project</p>
+        <div class="page-list">
+          <button class="nav-item active"><span class="nav-icon">01</span>方向探索</button>
+          <button class="nav-item"><span class="nav-icon">02</span>社交内容</button>
+          <button class="nav-item"><span class="nav-icon">03</span>交付文件</button>
+        </div>
+        <div class="mini-art" id="miniArt"></div>
+      </section>
+      <div class="profile">
+        <span class="avatar">ME</span>
+        <div class="profile-copy"><strong>个人设计空间</strong><span>本地 API 模式</span></div>
+      </div>
+    </aside>
+
+    <section class="workspace" id="workspace" aria-label="设计画布">
+      <div class="canvas-head">
+        <span class="crumb">方向探索 / 画板 01</span>
+        <span class="canvas-note">拖动画板 · 双击编辑 · C 打开对话</span>
+      </div>
+      <div class="canvas" id="canvas"></div>
+
+      <div class="marquee-selection" id="marqueeSelection" aria-hidden="true"></div>
+      <div class="selection-menu" aria-label="选择工具">
+        <button class="tool-button" data-tip="复制" id="duplicateBoard">⧉</button>
+        <button class="tool-button" data-tip="置顶" id="bringForward">⇧</button>
+        <button class="tool-button" data-tip="锁定" id="lockBoard">⌑</button>
+        <button class="tool-button" data-tip="删除" id="deleteBoard">⌫</button>
+      </div>
+
+      <div class="zoom-control">
+        <button class="canvas-control" id="zoomReset" data-tip="重置缩放" aria-label="重置缩放">○</button>
+        <button class="canvas-control" id="layersButton" data-tip="图层" aria-label="图层">≋</button>
+        <button class="canvas-control" id="lockCanvas" data-tip="锁定画布" aria-label="锁定画布">⌑</button>
+        <button class="canvas-control" id="fitCanvas" data-tip="适配画布" aria-label="适配画布">⌗</button>
+        <span class="zoom-divider"></span>
+        <button class="zoom-label" id="zoomLabel" aria-label="切换缩放比例">100%</button>
+      </div>
+
+      <section class="layer-panel" id="layerPanel" aria-label="图层">
+        <div class="layer-panel-head">LAYERS</div>
+        <div id="layerList"></div>
+      </section>
+
+      <nav class="canvas-toolbar" aria-label="画布工具">
+        <button class="tool-button active" data-tool="select" data-tip="选择 (V)">↖</button>
+        <button class="tool-button" data-tool="pin" data-tip="标记">⌾</button>
+        <button class="tool-button" data-tool="image" data-tip="图片 (I)">▧</button>
+        <button class="tool-button" data-tool="grid" data-tip="网格">#</button>
+        <button class="tool-button" data-tool="shape" data-tip="形状 (S)">□</button>
+        <button class="tool-button" data-tool="pen" data-tip="画笔 (P)">⌁</button>
+        <button class="tool-button" data-tool="text" data-tip="文字 (T)">T</button>
+        <span class="tool-divider"></span>
+        <button class="tool-button" data-tool="generate-image" data-tip="生成图片">✦</button>
+        <button class="tool-button" data-tool="generate-video" data-tip="生成视频">▷</button>
+        <button class="tool-button" data-tool="generate-text" data-tip="生成文案">T✦</button>
+      </nav>
+    </section>
+
+    <aside class="rightbar" aria-label="设计 Agent">
+      <header class="agent-head">
+        <div class="agent-title"><strong>新对话</strong><span class="agent-badge">Agnes Agent</span></div>
+        <div class="agent-head-actions">
+          <button class="icon-button" data-tip="新对话" id="newChatButton">＋</button>
+          <button class="icon-button" data-tip="历史对话" id="historyButton">↺</button>
+          <button class="icon-button" data-tip="API 设置" id="settingsButton">⚙</button>
+          <button class="icon-button" data-tip="收起 Agent" id="collapseAgent">→</button>
+        </div>
+      </header>
+
+      <div class="conversation" id="conversation">
+        <section class="welcome" id="welcome">
+          <div class="spark">✦</div>
+          <h2>今天想设计什么？</h2>
+          <p>我会读取当前画布、拆解任务、选择模型，并把可编辑结果放回画布。</p>
+        </section>
+        <p class="skill-label" id="skillLabel">试试这些设计 Skills</p>
+        <div class="skills" id="skills">
+          <button class="skill-chip" data-skill="Seedance 2.0 视频创作" data-question="把这组个人品牌素材拆成 6 个动态镜头，并保留四色系统。"><span class="skill-dot"></span>Seedance 2.0 视频创作</button>
+          <button class="skill-chip" data-skill="一镜到底视频" data-question="为当前画板设计一个一镜到底的镜头运动和节奏。"><span class="skill-dot"></span>一镜到底视频</button>
+          <button class="skill-chip" data-skill="Instagram Post" data-question="这条 Instagram Post 想要表达什么主题？"><span class="skill-dot"></span>Instagram Post</button>
+          <button class="skill-chip" data-skill="一键跨平台适配" data-question="选择一张现有画板，我会生成跨平台适配方案。"><span class="skill-dot"></span>一键跨平台适配</button>
+          <button class="skill-chip" data-skill="Logo 设计" data-question="先告诉我个人品牌名称、性格和三个关键词。"><span class="skill-dot"></span>Logo 设计</button>
+          <button class="skill-chip" data-skill="UGC：生活化上身图" data-question="描述要展示的设计物件和真实使用场景。"><span class="skill-dot"></span>UGC：生活化上身图</button>
+          <button class="skill-chip" data-skill="AI 造型师：高转化模特图" data-question="描述人物、服装和画面中的品牌露出位置。"><span class="skill-dot"></span>AI 造型师：高转化模特图</button>
+          <button class="skill-chip" data-skill="所有 Skills" data-question="告诉我目标，我会从可用工作流中选择最合适的一组。"><span class="skill-dot"></span>所有 Skills</button>
+        </div>
+        <div class="messages" id="messages" aria-live="polite"></div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="selected-skill" id="selectedSkill"><span id="selectedSkillText"></span><button id="clearSkill" aria-label="移除 Skill">×</button></div>
+        <div class="prompt-context" id="promptContext" aria-label="当前引用的画布图层"></div>
+        <div class="mention-menu" id="mentionMenu" role="listbox" aria-label="选择画布图层"></div>
+        <div class="composer">
+          <div class="prompt-preview" id="promptPreview" aria-label="引用图片预览"></div>
+          <textarea id="promptInput" placeholder="描述你的想法，或输入 @ 引用画板" aria-label="输入设计需求"></textarea>
+          <div class="composer-tools">
+            <div class="tool-group">
+              <button aria-label="添加文件" id="attachButton">＋</button>
+              <button class="mode-button" id="modeButton"><span>◎</span><span id="modeLabel">Agent</span><span>⌄</span></button>
+              <button class="model-button" id="modelButton"><span>◇</span><span id="modelLabel">Agnes Language</span><span>⌄</span></button>
+            </div>
+            <button class="send-button" id="sendButton" aria-label="发送">↑</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <input class="file-input" type="file" id="imageInput" accept="image/*" multiple>
+  <div class="cursor-thumbnail" id="cursorThumbnail" aria-hidden="true"><img alt="图片预览"></div>
+
+  <div class="menu mode-menu" id="modeMenu" role="menu">
+    <button class="active" data-mode="Agent"><span>◎ Agent</span><span>✓</span></button>
+    <button data-mode="图像"><span>▧ 图像</span><span></span></button>
+    <button data-mode="视频"><span>▷ 视频</span><span></span></button>
+  </div>
+
+  <div class="menu model-menu" id="modelMenu" role="dialog" aria-label="模型偏好">
+    <div class="model-menu-head"><span>模型偏好</span><button id="closeModel" aria-label="关闭模型列表">×</button></div>
+    <div class="model-tabs" id="modelTabs">
+      <button class="active" data-category="auto">自动</button>
+      <button data-category="language">Language</button>
+      <button data-category="image">Image</button>
+      <button data-category="video">Video</button>
+      <button data-category="3d">3D</button>
+    </div>
+    <div class="model-list" id="modelList"></div>
+  </div>
+
+  <section class="modal" id="settingsModal" role="dialog" aria-label="API 设置">
+    <div class="modal-head"><strong>个人 Agent API</strong><button class="icon-button" id="closeSettings" aria-label="关闭">×</button></div>
+    <div class="modal-body">
+      <label>API Endpoint<input id="apiEndpoint" value="/api/agent" spellcheck="false"></label>
+      <label>Project ID<input id="apiProjectId" value="personal-design-01" spellcheck="false"></label>
+      <label>Agent Runtime<select id="agentRuntime">
+        <option value="local">本地演示（不调用外部模型）</option>
+        <option value="codex-router">Codex / OpenAI Agent 网关</option>
+        <option value="agnes">Agnes AI</option>
+        <option value="custom">自定义模型网关</option>
+      </select></label>
+      <div id="agnesSettings" hidden>
+        <label>Agnes API Key（仅当前标签页）<input id="agnesApiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
+        <label>Language Endpoint<input id="agnesLanguageEndpoint" placeholder="https://.../chat/completions" spellcheck="false"></label>
+        <label>Image Endpoint<input id="agnesImageEndpoint" placeholder="https://.../images/generations" spellcheck="false"></label>
+        <label>Video Endpoint<input id="agnesVideoEndpoint" placeholder="https://.../videos/generations" spellcheck="false"></label>
+        <p class="api-hint">Agnes 的三个端点可分别配置。密钥只保存在 sessionStorage，不会写入此 HTML 文件；生产环境建议改用本地代理。</p>
+      </div>
+      <p class="api-hint">Codex/自定义网关建议把 API Key 放在服务端。Agnes 演示连接使用上方会话级密钥；正式部署时也应改为服务端代理。</p>
+      <pre>{
+  "projectId": "personal-design-01",
+  "runtime": "codex-router",
+  "mode": "agent | image | video",
+  "model": "auto",
+  "messages": [{ "role": "user", "content": "..." }],
+  "tools": ["canvas.read", "canvas.insert", "image.generate"]
+}
+
+Browser → /api/agent → Agent Router → Codex/OpenAI + Nano Banana</pre>
+    </div>
+    <div class="modal-foot"><button class="button" id="cancelSettings">取消</button><button class="button dark" id="saveSettings">保存设置</button></div>
+  </section>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const MIN_ZOOM = .01;
+    const MAX_ZOOM = 64;
+
+    const MODEL_CATALOG = {
+      auto: [
+        { name: "自动选择", description: "根据任务、速度与成本自动路由。", time: "auto" },
+        { name: "Agnes AI Auto", description: "由 Agnes 在语言、图片和视频能力间自动路由。", time: "Agnes" }
+      ],
+      language: [
+        { name: "Agnes Language", description: "Agnes 对话、文案与画布任务规划。", time: "Agnes" },
+        { name: "Codex Agent", description: "代码、工具调用与复杂设计工作流。", time: "Agent" }
+      ],
+      image: [
+        { name: "Agnes Image", description: "通过 Agnes 图片端点生成视觉素材。", time: "Agnes" },
+        { name: "GPT Image 2 Auto", description: "自动调整质量，适合多数设计任务。", time: "30s" },
+        { name: "GPT Image 2 High", description: "更高细节与文字表现。", time: "30s" },
+        { name: "Nano Banana Pro", description: "复杂参考图与专业输出。", time: "20s" },
+        { name: "Seedream 5.0 Pro", description: "适合海报、广告和高质感视觉。", time: "120s" },
+        { name: "Flux.2 Max", description: "快速高质量图像生成。", time: "10s" },
+        { name: "Midjourney", description: "风格化艺术视觉。", time: "20s" }
+      ],
+      video: [
+        { name: "Agnes Video", description: "通过 Agnes 视频端点生成动态素材。", time: "Agnes" },
+        { name: "Seedance 2.0", description: "通用参考与音画同步。", time: "300s" },
+        { name: "Kling 3.0", description: "复杂动作与镜头语言。", time: "300s" },
+        { name: "Veo 3.1", description: "原生音画一体视频。", time: "180s" },
+        { name: "Wan 2.6", description: "内置音频的视频生成。", time: "600s" },
+        { name: "Hailuo 2.3", description: "快速镜头与角色动作。", time: "180s" }
+      ],
+      "3d": [
+        { name: "Tripo", description: "从文字或图片生成高质量 3D 模型。", time: "180s" }
+      ]
+    };
+
+    function readSessionValue(key) {
+      try { return sessionStorage.getItem(key) || ""; }
+      catch { return ""; }
+    }
+
+    function writeSessionValue(key, value) {
+      try {
+        if (value) sessionStorage.setItem(key, value);
+        else sessionStorage.removeItem(key);
+      } catch {}
+    }
+
+    const state = {
+      mode: "Agent",
+      model: "Agnes Language",
+      modelCategory: "language",
+      skill: "",
+      zoom: 1,
+      credits: 70,
+      endpoint: "/api/agent",
+      projectId: "personal-design-01",
+      runtime: "agnes",
+      agnesApiKey: readSessionValue("personal-design.agnes-key"),
+      agnesEndpoints: {
+        agent: readSessionValue("personal-design.agnes-language-endpoint") || "https://apihub.agnes-ai.com/v1/chat/completions",
+        image: readSessionValue("personal-design.agnes-image-endpoint") || "https://apihub.agnes-ai.com/v1/images/generations",
+        video: readSessionValue("personal-design.agnes-video-endpoint") || "https://apihub.agnes-ai.com/v1/videos"
+      },
+      canvasLocked: false,
+      panX: 0,
+      panY: 0,
+      clipboardBoard: [],
+      clipboardPasteCount: 0,
+      contextClipboardReady: false,
+      selectedBoard: null,
+      selectedItems: new Set(),
+      boardCount: 0,
+      messages: []
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+    const ICONS = {
+      pointer: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 9-6 2-2 6Z"/><path d="m12 12 4 4"/></svg>',
+      squareDashed: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="3 3"/></svg>',
+      image: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m4 17 5-5 3 3 2-2 6 6"/></svg>',
+      mapPin: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></svg>',
+      hash: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h16M4 15h16M10 3 8 21M16 3l-2 18"/></svg>',
+      square: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>',
+      pencil: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10Z"/><path d="m13.5 7.5 3 3"/></svg>',
+      type: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M12 5v14M8 19h8"/></svg>',
+      spark: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6Z"/></svg>',
+      video: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3Z"/></svg>',
+      imageSpark: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="15" height="15" rx="2"/><path d="m4 17 4-4 3 3 2-2 4 4M17 2v6M14 5h6"/></svg>',
+      videoSpark: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="14" height="13" rx="2"/><path d="m9 10 4 2.5L9 15ZM19 2v6M16 5h6"/></svg>',
+      textSpark: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7V4h11v3M9.5 4v16M6 20h7M19 10v6M16 13h6"/></svg>',
+      circle: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/></svg>',
+      layers: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg>',
+      lockOpen: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 7-2.6"/></svg>',
+      scan: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4H4v4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>',
+      copy: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+      arrowUp: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v14"/></svg>',
+      lock: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+      unlock: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 7-2.6"/></svg>',
+      history: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 5v5h5M12 7v5l3 2"/></svg>',
+      arrowRight: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+      trash: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+      plus: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
+      settings: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg>',
+      close: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',
+      share: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 14v5h14v-5"/></svg>',
+      download: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg>',
+      send: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 14-7-4 14-3-6Z"/><path d="m12 13 7-8"/></svg>',
+      attach: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 12 6-6a4 4 0 0 1 6 6l-7 7a5 5 0 0 1-7-7l7-7"/></svg>',
+      chevron: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg>',
+      grid: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6" height="6"/><rect x="14" y="4" width="6" height="6"/><rect x="4" y="14" width="6" height="6"/><rect x="14" y="14" width="6" height="6"/></svg>'
+    };
+
+    function useIcon(element, name) {
+      if (!element || !ICONS[name]) return;
+      element.innerHTML = ICONS[name];
+    }
+
+    function applyIcons() {
+      const toolbarIcons = {
+        select: "pointer", pin: "mapPin", image: "image", grid: "hash", shape: "square",
+        pen: "pencil", text: "type", "generate-image": "imageSpark", "generate-video": "videoSpark",
+        "generate-text": "textSpark"
+      };
+      $$(".canvas-toolbar .tool-button[data-tool]").forEach((button) => useIcon(button, toolbarIcons[button.dataset.tool]));
+      useIcon($("#duplicateBoard"), "copy");
+      useIcon($("#bringForward"), "arrowUp");
+      useIcon($("#lockBoard"), "lock");
+      useIcon($("#deleteBoard"), "trash");
+      useIcon($("#newChatButton"), "plus");
+      useIcon($("#historyButton"), "history");
+      useIcon($("#settingsButton"), "settings");
+      useIcon($("#collapseAgent"), "arrowRight");
+      useIcon($("#closeModel"), "close");
+      useIcon($("#closeSettings"), "close");
+      useIcon($("#clearSkill"), "close");
+      useIcon($("#attachButton"), "attach");
+      useIcon($("#sendButton"), "send");
+      useIcon($("#shareButton"), "share");
+      useIcon($("#exportButton"), "download");
+      useIcon($("#zoomReset"), "circle");
+      useIcon($("#layersButton"), "layers");
+      useIcon($("#lockCanvas"), "lockOpen");
+      useIcon($("#fitCanvas"), "scan");
+      const modeIcon = $("#modeButton span:first-child");
+      const modeChevron = $("#modeButton span:last-child");
+      const modelIcon = $("#modelButton span:first-child");
+      const modelChevron = $("#modelButton span:last-child");
+      useIcon(modeIcon, "spark");
+      useIcon(modelIcon, "grid");
+      useIcon(modeChevron, "chevron");
+      useIcon(modelChevron, "chevron");
+    }
+
+    const elements = {
+      prompt: $("#promptInput"),
+      messages: $("#messages"),
+      conversation: $("#conversation"),
+      modeMenu: $("#modeMenu"),
+      modelMenu: $("#modelMenu"),
+      modelList: $("#modelList"),
+      settings: $("#settingsModal"),
+      canvas: $("#canvas"),
+      workspace: $("#workspace"),
+      selectionMenu: $(".selection-menu"),
+      marquee: $("#marqueeSelection"),
+      layerPanel: $("#layerPanel"),
+      layerList: $("#layerList"),
+      promptContext: $("#promptContext"),
+      promptPreview: $("#promptPreview"),
+      mentionMenu: $("#mentionMenu"),
+      cursorThumbnail: $("#cursorThumbnail"),
+      selectedSkill: $("#selectedSkill"),
+      selectedSkillText: $("#selectedSkillText"),
+      toast: $("#toast")
+    };
+
+    function makeThumb(colorA, colorB, label) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" fill="${colorA}"/><path d="M-10 94L78 -10H122L28 130Z" fill="${colorB}"/><rect x="12" y="12" width="55" height="10" fill="#181818"/><text x="12" y="111" font-family="Arial" font-size="10" font-weight="700" fill="#181818">${label}</text></svg>`;
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+    }
+
+    function renderMiniArt() {
+      const art = [
+        makeThumb("#c6f15c", "#ff6b55", "POSTER 01"),
+        makeThumb("#f3c64e", "#1f4d3b", "SOCIAL 02"),
+        makeThumb("#efeee8", "#3478f6", "SYSTEM 03"),
+        makeThumb("#222222", "#c6f15c", "MOTION 04")
+      ];
+      $("#miniArt").innerHTML = art.map((src, i) => `<button aria-label="打开素材 ${i + 1}"><img src="${src}" alt="个人设计缩略图 ${i + 1}"></button>`).join("");
+    }
+
+    function showToast(text) {
+      elements.toast.textContent = text;
+      elements.toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => elements.toast.classList.remove("show"), 1800);
+    }
+
+    function closeMenus() {
+      elements.modeMenu.classList.remove("open");
+      elements.modelMenu.classList.remove("open");
+    }
+
+    function renderModels(category = state.modelCategory) {
+      state.modelCategory = category;
+      $$("#modelTabs button").forEach((button) => button.classList.toggle("active", button.dataset.category === category));
+      elements.modelList.innerHTML = MODEL_CATALOG[category].map((model) => `
+        <button class="model-item ${state.model === model.name ? "active" : ""}" data-model="${model.name}" data-category="${category}">
+          <span class="model-info"><strong>${model.name}</strong><span>${model.description}</span></span>
+          <span class="model-time">${model.time}</span>
+        </button>`).join("");
+    }
+
+    function selectSkill(button) {
+      state.skill = button.dataset.skill;
+      elements.selectedSkillText.textContent = state.skill;
+      elements.selectedSkill.classList.add("visible");
+      addMessage("assistant", button.dataset.question, "Skill 已加载");
+      elements.prompt.focus();
+    }
+
+    function clearSkill() {
+      state.skill = "";
+      elements.selectedSkill.classList.remove("visible");
+    }
+
+    function addMessage(role, content, meta = "") {
+      state.messages.push({ role, content });
+      const item = document.createElement("div");
+      item.className = `message ${role}`;
+      item.innerHTML = `<div class="message-avatar">${role === "user" ? "ME" : "AI"}</div><div class="bubble"></div>`;
+      item.querySelector(".bubble").textContent = content;
+      if (meta) {
+        const small = document.createElement("small");
+        small.textContent = meta;
+        item.querySelector(".bubble").appendChild(small);
+      }
+      elements.messages.appendChild(item);
+      elements.conversation.scrollTop = elements.conversation.scrollHeight;
+      return item;
+    }
+
+    function addTyping() {
+      const item = document.createElement("div");
+      item.className = "message assistant";
+      item.innerHTML = `<div class="message-avatar">AI</div><div class="bubble typing"><i></i><i></i><i></i></div>`;
+      elements.messages.appendChild(item);
+      elements.conversation.scrollTop = elements.conversation.scrollHeight;
+      return item;
+    }
+
+    function getCanvasContext() {
+      return {
+        page: "方向探索",
+        selectedBoard: state.selectedBoard?.dataset.board || null,
+        boardCount: getCanvasItems().length,
+        palette: ["#18201d", "#c6f15c", "#ff6b55", "#f3c64e"],
+        format: state.selectedBoard?.dataset.board === "social" ? "1080x1350" : "poster"
+      };
+    }
+
+    function buildAgentRequest(message) {
+      const modeMap = { Agent: "agent", "图像": "image", "视频": "video" };
+      const tools = ["canvas.read", "canvas.insert"];
+      if (state.mode === "图像" || state.mode === "Agent") tools.push("image.generate");
+      if (state.mode === "视频") tools.push("video.generate");
+      return {
+        projectId: state.projectId,
+        runtime: state.runtime,
+        mode: modeMap[state.mode],
+        model: state.model,
+        skill: state.skill || null,
+        messages: [...state.messages],
+        canvasContext: getCanvasContext(),
+        tools,
+        responseFormat: "design-plan+canvas-actions"
+      };
+    }
+
+    function agnesModelId(name, mode) {
+      const modelsByMode = {
+        agent: "agnes-2.0-flash",
+        image: "agnes-image-2.0-flash",
+        video: "agnes-video-v2.0"
+      };
+      return modelsByMode[mode] || "agnes-2.0-flash";
+    }
+
+    function normalizeAgnesResponse(raw, mode) {
+      const first = raw?.data?.[0] || raw?.output?.[0] || raw?.result || {};
+      const base64 = first.b64_json || raw?.b64_json;
+      const assetUrl = raw?.metadata?.url || first.url || first.video_url || first.image_url || raw?.url || raw?.video_url || raw?.image_url || (base64 ? `data:image/png;base64,${base64}` : null);
+      const content = raw?.choices?.[0]?.message?.content;
+      const message = raw?.message || (typeof content === "string" ? content : null) || raw?.text || raw?.output_text
+        || (mode === "image" && assetUrl ? "Agnes 已生成图片并放入画布。" : null)
+        || (mode === "video" && assetUrl ? "Agnes 已生成视频并放入画布。" : null)
+        || (mode === "video" && (raw?.video_id || raw?.task_id || raw?.id) ? `Agnes 视频任务已提交：${raw.video_id || raw.task_id || raw.id}` : null)
+        || "Agnes 已完成请求。";
+      const actions = Array.isArray(raw?.actions) ? raw.actions : [];
+      if ((mode === "image" || mode === "video") && assetUrl) {
+        actions.push({ type: "canvas.insert", asset: mode, url: assetUrl, label: `Agnes ${mode}` });
+      }
+      return {
+        message,
+        actions,
+        raw
+      };
+    }
+
+    async function pollAgnesVideo(raw) {
+      if (raw?.status === "completed" && raw?.metadata?.url) return raw;
+      const videoId = raw?.video_id || raw?.task_id || raw?.id;
+      if (!videoId) return raw;
+      const resultEndpoint = `https://apihub.agnes-ai.com/agnesapi?video_id=${encodeURIComponent(videoId)}`;
+      for (let attempt = 0; attempt < 30; attempt += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const response = await fetch(resultEndpoint, {
+          headers: { "Authorization": `Bearer ${state.agnesApiKey}` }
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result?.error?.message || result?.message || `Agnes 视频查询 ${response.status}`);
+        if (result?.status === "failed") throw new Error(result?.error?.message || "Agnes 视频生成失败");
+        if (result?.status === "completed" && result?.metadata?.url) return result;
+      }
+      return raw;
+    }
+
+    async function callAgnesAgent(payload) {
+      const endpoint = state.agnesEndpoints[payload.mode];
+      if (!endpoint) throw new Error(`请先在 API 设置中填写 Agnes ${payload.mode} Endpoint`);
+      if (!state.agnesApiKey) throw new Error("请先在 API 设置中填写 Agnes API Key");
+      const latestPrompt = payload.messages.at(-1)?.content || "";
+      let body;
+      if (payload.mode === "agent") {
+        body = {
+          model: agnesModelId(payload.model, payload.mode),
+          messages: [
+            { role: "system", content: `You are Agnes, the design agent inside a personal infinite canvas. Answer the user's entire conversation in Chinese unless they request another language. Use the current canvas context when useful: ${JSON.stringify(payload.canvasContext)}` },
+            ...payload.messages
+          ]
+        };
+      } else if (payload.mode === "image") {
+        body = {
+          model: agnesModelId(payload.model, payload.mode),
+          prompt: latestPrompt,
+          size: "1024x1024",
+          extra_body: { response_format: "url" }
+        };
+      } else {
+        body = {
+          model: agnesModelId(payload.model, payload.mode),
+          prompt: latestPrompt,
+          width: 1152,
+          height: 768,
+          num_frames: 121,
+          frame_rate: 24
+        };
+      }
+      let response;
+      try {
+        response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${state.agnesApiKey}`
+          },
+          body: JSON.stringify(body)
+        });
+      } catch {
+        throw new Error("无法连接 Agnes API。若当前为 file:// 页面，请确认 Agnes 已允许浏览器跨域访问，或改用本地代理打开页面。");
+      }
+      const raw = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(raw?.error?.message || raw?.message || `Agnes API ${response.status}`);
+      const result = payload.mode === "video" ? await pollAgnesVideo(raw) : raw;
+      return normalizeAgnesResponse(result, payload.mode);
+    }
+
+    async function callPersonalDesignAgent(payload) {
+      if (typeof window.personalDesignApi === "function") {
+        return window.personalDesignApi(payload);
+      }
+
+      if (state.runtime === "agnes") return callAgnesAgent(payload);
+
+      if (state.runtime !== "local" || (state.endpoint && state.endpoint !== "/api/agent")) {
+        const response = await fetch(state.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`API ${response.status}`);
+        return response.json();
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 820));
+      const subject = payload.messages.at(-1)?.content || "这个方向";
+      const modeText = payload.mode === "video" ? "6 镜头动态分镜" : payload.mode === "image" ? "两套视觉变体" : "设计策略与可编辑画板";
+      return {
+        message: `已结合当前画布整理「${subject.slice(0, 24)}${subject.length > 24 ? "…" : ""}」。我会保持现有高对比排版与四色系统，先产出${modeText}，再根据你的反馈收紧细节。`,
+        actions: [{ type: "canvas.insert", asset: payload.mode, label: `${payload.skill || "自由创作"} / ${payload.model}` }]
+      };
+    }
+
+    function insertGeneratedBoard(response) {
+      const action = response.actions?.[0] || {};
+      if (action.type !== "canvas.insert" || !action.url) return null;
+      if (action.asset === "image") {
+        return insertImageBoard(action.url, action.label || "Agnes image");
+      }
+      state.boardCount += 1;
+      const board = document.createElement("article");
+      board.className = "board generated-board";
+      board.dataset.board = `generated-${state.boardCount}`;
+      board.tabIndex = 0;
+      board.style.width = "240px";
+      board.style.height = "300px";
+      board.style.left = `${26 + (state.boardCount % 3) * 16}%`;
+      board.style.top = `${32 + (state.boardCount % 2) * 18}%`;
+      board.innerHTML = `<small class="board-title">Agent output / ${state.boardCount}</small>`;
+      if (action.url && action.asset === "video") {
+        const video = document.createElement("video");
+        video.src = action.url;
+        video.controls = true;
+        video.playsInline = true;
+        video.style.cssText = "display:block;width:100%;height:100%;object-fit:cover;background:#111";
+        board.appendChild(video);
+      } else {
+        const image = document.createElement("img");
+        image.src = action.url || makeThumb(state.boardCount % 2 ? "#c6f15c" : "#f3c64e", state.boardCount % 2 ? "#3478f6" : "#ff6b55", action.asset === "image" ? "AGNES IMAGE" : "AI DIRECTION");
+        image.alt = "Agent generated design output";
+        image.style.cssText = "display:block;width:100%;height:100%;object-fit:contain;background:transparent";
+        board.appendChild(image);
+      }
+      elements.canvas.appendChild(board);
+      bindBoard(board);
+      selectBoard(board);
+      showToast(action.label || "新画板已加入画布");
+    }
+
+    async function submitPrompt() {
+      const value = elements.prompt.value.trim();
+      if (!value) return;
+      addMessage("user", value, `${state.mode} · ${state.model}`);
+      elements.prompt.value = "";
+      $("#sendButton").disabled = true;
+      const typing = addTyping();
+      const payload = buildAgentRequest(value);
+      try {
+        const response = await callPersonalDesignAgent(payload);
+        typing.remove();
+        addMessage("assistant", response.message || "已完成。", `已调用 ${payload.tools.join(" + ")}`);
+        if (response.actions?.some((action) => action.type === "canvas.insert" && action.url)) insertGeneratedBoard(response);
+        state.credits = Math.max(0, state.credits - (state.mode === "视频" ? 8 : 2));
+        $("#creditValue").textContent = state.credits;
+      } catch (error) {
+        typing.remove();
+        addMessage("assistant", `请求失败：${error.message}`, "请检查 API Endpoint");
+      } finally {
+        $("#sendButton").disabled = false;
+      }
+    }
+
+    function getCanvasItems() {
+      return $$(".board");
+    }
+
+    function getSelectedItems() {
+      return [...state.selectedItems].filter((item) => item.isConnected);
+    }
+
+    function setSelectedItems(items, primary = null) {
+      const valid = [...new Set(items)].filter((item) => item?.isConnected && item.classList.contains("board"));
+      state.selectedItems = new Set(valid);
+      state.selectedBoard = primary && state.selectedItems.has(primary) ? primary : valid.at(-1) || null;
+      getCanvasItems().forEach((item) => item.classList.toggle("selected", state.selectedItems.has(item)));
+      if (state.selectedBoard && !state.selectedBoard.hasAttribute("tabindex")) state.selectedBoard.tabIndex = 0;
+      state.selectedBoard?.focus?.({ preventScroll: true });
+      elements.workspace.classList.toggle("has-selection", valid.length > 0);
+      const locked = state.selectedBoard?.classList.contains("locked");
+      useIcon($("#lockBoard"), locked ? "unlock" : "lock");
+      $("#lockBoard").dataset.tip = locked ? "Unlock" : "Lock";
+      renderLayerPanel();
+      renderPromptContext();
+      renderPromptPreview();
+      requestAnimationFrame(updateSelectionMenuPosition);
+    }
+
+    function clearSelection() {
+      setSelectedItems([]);
+    }
+
+    function updateSelectionMenuPosition() {
+      const selected = state.selectedBoard;
+      if (!selected || !selected.isConnected) {
+        elements.workspace.classList.remove("has-selection");
+        return;
+      }
+      const workspaceRect = elements.workspace.getBoundingClientRect();
+      const selectedRect = selected.getBoundingClientRect();
+      const menuWidth = elements.selectionMenu.offsetWidth || 150;
+      const menuHeight = elements.selectionMenu.offsetHeight || 42;
+      const edge = 10;
+      let left = selectedRect.left - workspaceRect.left + selectedRect.width / 2 - menuWidth / 2;
+      let top = selectedRect.top - workspaceRect.top - menuHeight - 12;
+      left = Math.max(edge, Math.min(workspaceRect.width - menuWidth - edge, left));
+      if (top < edge) top = selectedRect.bottom - workspaceRect.top + 12;
+      top = Math.max(edge, Math.min(workspaceRect.height - menuHeight - edge, top));
+      elements.selectionMenu.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
+    }
+
+    function selectBoard(board, additive = false) {
+      if (!board) return clearSelection();
+      if (!additive) return setSelectedItems([board], board);
+      const selected = new Set(getSelectedItems());
+      if (selected.has(board)) selected.delete(board);
+      else selected.add(board);
+      setSelectedItems([...selected], selected.has(board) ? board : [...selected].at(-1));
+    }
+
+    function bindBoard(board) {
+      if (board.classList.contains("image-board")) ensureImageResizeHandle(board);
+      if (board.classList.contains("image-board") && !board._cursorThumbnailBound) {
+        board._cursorThumbnailBound = true;
+        board.addEventListener("pointermove", (event) => showCursorThumbnail(board, event));
+        board.addEventListener("pointerleave", hideCursorThumbnail);
+      }
+      board.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0) return;
+        if (event.ctrlKey || event.metaKey) return;
+        if (event.shiftKey) {
+          event.preventDefault();
+          selectBoard(board, true);
+          return;
+        }
+        if (state.canvasLocked) {
+          showToast("画布已锁定");
+          return;
+        }
+        if (board.classList.contains("locked")) {
+          selectBoard(board);
+          if (board.classList.contains("image-board")) focusPromptForBoard(board);
+          showToast("画板已锁定");
+          return;
+        }
+        if (!state.selectedItems.has(board)) selectBoard(board);
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const moveItems = getSelectedItems().filter((item) => !item.classList.contains("locked"));
+        if (!moveItems.length) return;
+        const starts = moveItems.map((item) => ({ item, left: item.offsetLeft, top: item.offsetTop }));
+        board.setPointerCapture?.(event.pointerId);
+        event.preventDefault();
+        let frame = 0;
+        let moved = false;
+        let latestX = startX;
+        let latestY = startY;
+        const move = (moveEvent) => {
+          latestX = moveEvent.clientX;
+          latestY = moveEvent.clientY;
+          moved = moved || Math.abs(latestX - startX) > 3 || Math.abs(latestY - startY) > 3;
+          if (frame) return;
+          frame = requestAnimationFrame(() => {
+            const deltaX = (latestX - startX) / state.zoom;
+            const deltaY = (latestY - startY) / state.zoom;
+            starts.forEach(({ item, left, top }) => {
+              item.style.left = `${left + deltaX}px`;
+              item.style.top = `${top + deltaY}px`;
+            });
+            updateSelectionMenuPosition();
+            frame = 0;
+          });
+        };
+        const up = () => {
+          if (frame) {
+            cancelAnimationFrame(frame);
+            const deltaX = (latestX - startX) / state.zoom;
+            const deltaY = (latestY - startY) / state.zoom;
+            starts.forEach(({ item, left, top }) => {
+              item.style.left = `${left + deltaX}px`;
+              item.style.top = `${top + deltaY}px`;
+            });
+            updateSelectionMenuPosition();
+          }
+          frame = 0;
+          board.removeEventListener("pointermove", move);
+          board.removeEventListener("pointerup", up);
+          board.removeEventListener("pointercancel", up);
+          board.releasePointerCapture?.(event.pointerId);
+          if (!moved && board.classList.contains("image-board")) focusPromptForBoard(board);
+        };
+        board.addEventListener("pointermove", move);
+        board.addEventListener("pointerup", up);
+        board.addEventListener("pointercancel", up);
+      });
+    }
+
+    function intersects(rectA, rectB) {
+      return rectA.left < rectB.right && rectA.right > rectB.left && rectA.top < rectB.bottom && rectA.bottom > rectB.top;
+    }
+
+    function bindMarqueeSelection() {
+      document.addEventListener("selectstart", (event) => {
+        if (elements.workspace.classList.contains("is-marquee")) event.preventDefault();
+      });
+      elements.workspace.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.target !== elements.canvas || state.canvasLocked) return;
+        event.preventDefault();
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const baseSelection = event.shiftKey ? getSelectedItems() : [];
+        const workspaceRect = elements.workspace.getBoundingClientRect();
+        if (!event.shiftKey) clearSelection();
+        elements.workspace.setPointerCapture?.(event.pointerId);
+        elements.workspace.classList.add("is-marquee");
+        elements.marquee.style.display = "block";
+        const update = (moveEvent) => {
+          moveEvent.preventDefault();
+          const left = Math.min(startX, moveEvent.clientX);
+          const top = Math.min(startY, moveEvent.clientY);
+          const width = Math.abs(moveEvent.clientX - startX);
+          const height = Math.abs(moveEvent.clientY - startY);
+          elements.marquee.style.left = `${left - workspaceRect.left}px`;
+          elements.marquee.style.top = `${top - workspaceRect.top}px`;
+          elements.marquee.style.width = `${width}px`;
+          elements.marquee.style.height = `${height}px`;
+          const marqueeRect = { left, top, right: left + width, bottom: top + height };
+          const hitItems = getCanvasItems().filter((item) => intersects(item.getBoundingClientRect(), marqueeRect));
+          setSelectedItems([...baseSelection, ...hitItems], hitItems.at(-1) || baseSelection.at(-1) || null);
+        };
+        const finish = () => {
+          elements.workspace.classList.remove("is-marquee");
+          elements.marquee.style.display = "none";
+          elements.workspace.removeEventListener("pointermove", update);
+          elements.workspace.removeEventListener("pointerup", finish);
+          elements.workspace.removeEventListener("pointercancel", finish);
+          elements.workspace.releasePointerCapture?.(event.pointerId);
+        };
+        elements.workspace.addEventListener("pointermove", update);
+        elements.workspace.addEventListener("pointerup", finish);
+        elements.workspace.addEventListener("pointercancel", finish);
+      });
+    }
+
+    function renderCanvasTransform() {
+      elements.canvas.style.transform = `translate3d(${state.panX}px, ${state.panY}px, 0) scale(${state.zoom})`;
+      const gridSize = Math.max(6, 18 * state.zoom);
+      elements.workspace.style.backgroundSize = `${gridSize}px ${gridSize}px`;
+      elements.workspace.style.backgroundPosition = `calc(50% + ${state.panX}px) calc(50% + ${state.panY}px)`;
+      requestAnimationFrame(updateSelectionMenuPosition);
+    }
+
+    function setZoom(next) {
+      state.zoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+      renderCanvasTransform();
+      $("#zoomLabel").textContent = `${Math.round(state.zoom * 100)}%`;
+    }
+
+    function setZoomAt(next, clientX, clientY) {
+      const oldZoom = state.zoom;
+      const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+      if (Math.abs(nextZoom - oldZoom) < .001) return;
+      const rect = elements.workspace.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top + rect.height / 2;
+      const pointX = clientX ?? originX;
+      const pointY = clientY ?? originY;
+      const worldX = (pointX - originX - state.panX) / oldZoom;
+      const worldY = (pointY - originY - state.panY) / oldZoom;
+      state.zoom = nextZoom;
+      state.panX = pointX - originX - worldX * nextZoom;
+      state.panY = pointY - originY - worldY * nextZoom;
+      renderCanvasTransform();
+      $("#zoomLabel").textContent = `${Math.round(state.zoom * 100)}%`;
+    }
+
+    function bindCanvasPan() {
+      elements.workspace.addEventListener("pointerdown", (event) => {
+        const modifierPan = event.button === 0 && (event.ctrlKey || event.metaKey);
+        const middlePan = event.button === 1;
+        const excluded = event.target.closest(".canvas-toolbar, .zoom-control, .selection-menu");
+        if ((!modifierPan && !middlePan) || excluded) return;
+        event.preventDefault();
+        elements.workspace.classList.add("is-panning");
+        elements.workspace.setPointerCapture?.(event.pointerId);
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startPanX = state.panX;
+        const startPanY = state.panY;
+        let latestX = startX;
+        let latestY = startY;
+        let frame = 0;
+        const move = (moveEvent) => {
+          latestX = moveEvent.clientX;
+          latestY = moveEvent.clientY;
+          if (frame) return;
+          frame = requestAnimationFrame(() => {
+            state.panX = startPanX + latestX - startX;
+            state.panY = startPanY + latestY - startY;
+            renderCanvasTransform();
+            frame = 0;
+          });
+        };
+        const up = () => {
+          if (frame) {
+            cancelAnimationFrame(frame);
+            state.panX = startPanX + latestX - startX;
+            state.panY = startPanY + latestY - startY;
+            renderCanvasTransform();
+          }
+          frame = 0;
+          elements.workspace.classList.remove("is-panning");
+          elements.workspace.removeEventListener("pointermove", move);
+          elements.workspace.removeEventListener("pointerup", up);
+          elements.workspace.removeEventListener("pointercancel", up);
+          elements.workspace.releasePointerCapture?.(event.pointerId);
+        };
+        elements.workspace.addEventListener("pointermove", move);
+        elements.workspace.addEventListener("pointerup", up);
+        elements.workspace.addEventListener("pointercancel", up);
+      });
+    }
+
+    function getLayerItems() {
+      return getCanvasItems().map((item, index) => ({
+        item,
+        index,
+        z: Number.parseInt(item.style.zIndex || "0", 10) || 0
+      })).sort((a, b) => b.z - a.z || b.index - a.index);
+    }
+
+    function layerName(item, index) {
+      return item.querySelector(".board-title")?.textContent?.trim() || item.dataset.board || `Board ${index + 1}`;
+    }
+
+    function layerMentionName(item, index) {
+      const fullName = layerName(item, index);
+      if (item.classList.contains("image-board")) {
+        const number = item.dataset.board?.match(/(\d+)$/)?.[1] || String(index + 1);
+        return `图片 ${number}`;
+      }
+      return fullName.length > 18 ? `${fullName.slice(0, 17)}…` : fullName;
+    }
+
+    function renderPromptContext() {
+      if (!elements.promptContext) return;
+      const selected = getSelectedItems();
+      elements.promptContext.innerHTML = "";
+      selected.forEach((item) => {
+        const layer = getLayerItems().find(({ item: candidate }) => candidate === item);
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "context-chip";
+        chip.dataset.layerId = item.dataset.board;
+        chip.textContent = layerMentionName(item, layer?.index || 0);
+        chip.title = `引用：${layerName(item, layer?.index || 0)}`;
+        elements.promptContext.appendChild(chip);
+      });
+      elements.promptContext.classList.toggle("visible", selected.length > 0);
+    }
+
+    function renderPromptPreview() {
+      if (!elements.promptPreview) return;
+      elements.promptPreview.innerHTML = "";
+      const images = getSelectedItems().filter((item) => item.classList.contains("image-board") && item.querySelector("img")?.src).slice(0, 4);
+      images.forEach((item) => {
+        const layer = getLayerItems().find(({ item: candidate }) => candidate === item);
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "prompt-preview-card";
+        card.dataset.layerId = item.dataset.board;
+        card.title = `引用：${layerName(item, layer?.index || 0)}`;
+        const image = document.createElement("img");
+        image.src = item.querySelector("img").currentSrc || item.querySelector("img").src;
+        image.alt = layerMentionName(item, layer?.index || 0);
+        const label = document.createElement("span");
+        label.textContent = layerMentionName(item, layer?.index || 0);
+        card.append(image, label);
+        elements.promptPreview.appendChild(card);
+      });
+      elements.promptPreview.classList.toggle("visible", images.length > 0);
+    }
+
+    function showCursorThumbnail(board, event) {
+      if (!board.classList.contains("image-board")) return;
+      const image = board.querySelector("img");
+      const source = image?.currentSrc || image?.src;
+      if (!source) return;
+      const thumbnailImage = elements.cursorThumbnail.querySelector("img");
+      if (thumbnailImage.src !== source) thumbnailImage.src = source;
+      const width = 108;
+      const height = 82;
+      elements.cursorThumbnail.style.left = `${Math.min(event.clientX, window.innerWidth - width - 16)}px`;
+      elements.cursorThumbnail.style.top = `${Math.min(event.clientY, window.innerHeight - height - 16)}px`;
+      elements.cursorThumbnail.classList.add("visible");
+    }
+
+    function hideCursorThumbnail() {
+      elements.cursorThumbnail.classList.remove("visible");
+    }
+
+    function getMentionToken() {
+      const value = elements.prompt.value;
+      const cursor = elements.prompt.selectionStart ?? value.length;
+      const before = value.slice(0, cursor);
+      const match = /(?:^|\s)@([^\n@]*)$/.exec(before);
+      if (!match) return null;
+      const tokenStart = match.index + (match[0][0] === " " ? 1 : 0);
+      return { start: tokenStart, end: cursor, query: match[1].trim() };
+    }
+
+    function closeMentionMenu() {
+      elements.mentionMenu.classList.remove("open");
+      elements.mentionMenu.innerHTML = "";
+    }
+
+    function openMentionMenu(query = "") {
+      const normalized = query.toLowerCase();
+      const layers = getLayerItems().filter(({ item, index }) => layerName(item, index).toLowerCase().includes(normalized));
+      elements.mentionMenu.innerHTML = "";
+      if (!layers.length) {
+        elements.mentionMenu.innerHTML = '<div class="mention-menu-empty">暂无可引用的画布图层</div>';
+      } else {
+        layers.forEach(({ item, index }) => {
+          const option = document.createElement("button");
+          option.type = "button";
+          option.className = `mention-option${state.selectedItems.has(item) ? " active" : ""}`;
+          option.dataset.layerId = item.dataset.board;
+          const title = document.createElement("span");
+          title.textContent = `@${layerName(item, index)}`;
+          const meta = document.createElement("small");
+          meta.textContent = item.classList.contains("image-board") ? "图片" : "图层";
+          option.append(title, meta);
+          elements.mentionMenu.appendChild(option);
+        });
+      }
+      elements.mentionMenu.classList.add("open");
+    }
+
+    function insertBoardMention(board, { append = true } = {}) {
+      if (!board) return;
+      const layer = getLayerItems().find(({ item }) => item === board);
+      const mention = `@${layerMentionName(board, layer?.index || 0)}`;
+      const value = elements.prompt.value;
+      const start = elements.prompt.selectionStart ?? value.length;
+      const end = elements.prompt.selectionEnd ?? start;
+      const before = value.slice(0, start);
+      const after = value.slice(end);
+      const alreadyMentioned = before.endsWith(mention);
+      const prefix = before && !/\s$/.test(before) && !alreadyMentioned ? " " : "";
+      const suffix = append && !after.startsWith(" ") ? " " : "";
+      const next = alreadyMentioned ? value : `${before}${prefix}${mention}${suffix}${after}`;
+      elements.prompt.value = next;
+      const caret = alreadyMentioned ? start : before.length + prefix.length + mention.length + suffix.length;
+      elements.prompt.setSelectionRange(caret, caret);
+    }
+
+    function focusPromptForBoard(board, addMention = true) {
+      if (!board) return;
+      selectBoard(board);
+      elements.prompt.focus();
+      state.contextClipboardReady = true;
+      if (addMention) insertBoardMention(board);
+      openMentionMenu("");
+    }
+
+    function chooseMentionLayer(board) {
+      if (!board) return;
+      selectBoard(board);
+      const token = getMentionToken();
+      if (token) {
+        const layer = getLayerItems().find(({ item }) => item === board);
+        const mention = `@${layerMentionName(board, layer?.index || 0)}`;
+        const value = elements.prompt.value;
+        const next = `${value.slice(0, token.start)}${mention} ${value.slice(token.end)}`;
+        elements.prompt.value = next;
+        const caret = token.start + mention.length + 1;
+        elements.prompt.setSelectionRange(caret, caret);
+      } else {
+        insertBoardMention(board);
+      }
+      elements.prompt.focus();
+      closeMentionMenu();
+    }
+
+    function renderLayerPanel() {
+      if (!elements.layerList) return;
+      elements.layerList.innerHTML = getLayerItems().map(({ item, index }) => {
+        const id = item.dataset.board;
+        const selected = state.selectedItems.has(item) ? " selected" : "";
+        const locked = item.classList.contains("locked") ? " [locked]" : "";
+        return `<div class="layer-row${selected}" data-layer-id="${id}"><button class="layer-select" title="${layerName(item, index)}">${layerName(item, index)}${locked}</button><button class="layer-order" data-layer-action="up" aria-label="Move layer up">&#8593;</button><button class="layer-order" data-layer-action="down" aria-label="Move layer down">&#8595;</button></div>`;
+      }).join("") || '<div class="layer-panel-head">No layers</div>';
+    }
+
+    function moveLayer(item, direction) {
+      const layers = getLayerItems().reverse();
+      const currentIndex = layers.findIndex((layer) => layer.item === item);
+      const swapIndex = currentIndex + direction;
+      if (currentIndex < 0 || swapIndex < 0 || swapIndex >= layers.length) return;
+      const other = layers[swapIndex].item;
+      const currentZ = Number.parseInt(item.style.zIndex || "0", 10) || 0;
+      const otherZ = Number.parseInt(other.style.zIndex || "0", 10) || 0;
+      item.style.zIndex = String(otherZ || (direction > 0 ? currentZ + 1 : Math.max(0, currentZ - 1)));
+      other.style.zIndex = String(currentZ || (direction > 0 ? Math.max(0, otherZ - 1) : otherZ + 1));
+      renderLayerPanel();
+    }
+
+    function addBlankBoard(kind = "frame") {
+      state.boardCount += 1;
+      const board = document.createElement("article");
+      board.className = "board";
+      board.dataset.board = `${kind}-${state.boardCount}`;
+      board.tabIndex = 0;
+      board.style.width = kind === "text" ? "260px" : kind === "pin" ? "190px" : "280px";
+      board.style.height = kind === "text" ? "130px" : kind === "pin" ? "96px" : "350px";
+      board.style.left = `${18 + (state.boardCount % 4) * 13}%`;
+      board.style.top = `${24 + (state.boardCount % 3) * 11}%`;
+      board.innerHTML = kind === "text"
+        ? `<small class="board-title">Text block</small><div style="padding:22px;font-size:27px;font-weight:800;line-height:1.05">A clear idea<br>deserves room.</div>`
+        : kind === "pin"
+          ? `<small class="board-title">Canvas marker ${state.boardCount}</small><div style="display:flex;align-items:center;gap:10px;height:100%;padding:18px;background:#fffef7"><span style="display:grid;place-items:center;width:30px;height:30px;border-radius:50%;color:white;background:#171717">${ICONS.mapPin}</span><strong style="font-size:12px">Review this direction</strong></div>`
+        : kind === "shape"
+          ? `<small class="board-title">Shape study ${state.boardCount}</small><div class="shape-art"></div>`
+          : `<small class="board-title">New artboard ${state.boardCount}</small><div style="display:grid;place-items:center;height:100%;color:#999;font-size:11px">空白画板</div>`;
+      elements.canvas.appendChild(board);
+      bindBoard(board);
+      selectBoard(board);
+    }
+
+    function bindSketchCanvas(board) {
+      const drawing = board.querySelector("canvas");
+      if (!drawing || drawing._drawingBound) return;
+      drawing._drawingBound = true;
+      const context = drawing.getContext("2d");
+      context.lineCap = "round";
+      context.lineJoin = "round";
+      context.strokeStyle = "#171717";
+      context.lineWidth = 5;
+      let drawingNow = false;
+      drawing.addEventListener("pointerdown", (event) => {
+        if (event.ctrlKey || event.metaKey) return;
+        event.stopPropagation();
+        selectBoard(board);
+        drawingNow = true;
+        drawing.setPointerCapture?.(event.pointerId);
+        const rect = drawing.getBoundingClientRect();
+        context.beginPath();
+        context.moveTo((event.clientX - rect.left) * (drawing.width / rect.width), (event.clientY - rect.top) * (drawing.height / rect.height));
+      });
+      drawing.addEventListener("pointermove", (event) => {
+        if (!drawingNow) return;
+        const rect = drawing.getBoundingClientRect();
+        context.lineTo((event.clientX - rect.left) * (drawing.width / rect.width), (event.clientY - rect.top) * (drawing.height / rect.height));
+        context.stroke();
+      });
+      const finishDrawing = () => { drawingNow = false; };
+      drawing.addEventListener("pointerup", finishDrawing);
+      drawing.addEventListener("pointercancel", finishDrawing);
+    }
+
+    function addSketchBoard() {
+      state.boardCount += 1;
+      const board = document.createElement("article");
+      board.className = "board sketch-board";
+      board.dataset.board = `sketch-${state.boardCount}`;
+      board.tabIndex = 0;
+      board.style.width = "360px";
+      board.style.height = "240px";
+      board.style.left = `${20 + (state.boardCount % 4) * 12}%`;
+      board.style.top = `${26 + (state.boardCount % 3) * 10}%`;
+      board.innerHTML = `<small class="board-title">Freehand sketch ${state.boardCount}</small><canvas width="720" height="480" aria-label="自由绘图画板"></canvas>`;
+      elements.canvas.appendChild(board);
+      bindSketchCanvas(board);
+      bindBoard(board);
+      selectBoard(board);
+      showToast("已创建自由绘图画板");
+    }
+
+    function fitImageBoardToSource(board, image) {
+      if (!image.naturalWidth || !image.naturalHeight) return;
+      const maxInitialSize = 520;
+      const scale = Math.min(1, maxInitialSize / Math.max(image.naturalWidth, image.naturalHeight));
+      board.style.width = `${Math.max(1, Math.round(image.naturalWidth * scale))}px`;
+      board.style.height = `${Math.max(1, Math.round(image.naturalHeight * scale))}px`;
+      board.dataset.aspectRatio = String(image.naturalWidth / image.naturalHeight);
+      requestAnimationFrame(updateSelectionMenuPosition);
+    }
+
+    function ensureImageResizeHandle(board) {
+      if (!board.classList.contains("image-board")) return;
+      let handle = board.querySelector(".image-resize-handle");
+      if (!handle) {
+        handle = document.createElement("button");
+        handle.className = "image-resize-handle";
+        handle.type = "button";
+        handle.setAttribute("aria-label", "Resize image proportionally");
+        board.appendChild(handle);
+      }
+      if (handle._resizeBound) return;
+      handle._resizeBound = true;
+      handle.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || state.canvasLocked || board.classList.contains("locked")) return;
+        event.preventDefault();
+        event.stopPropagation();
+        selectBoard(board);
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startWidth = board.offsetWidth;
+        const startHeight = board.offsetHeight;
+        const aspect = Number.parseFloat(board.dataset.aspectRatio) || startWidth / startHeight || 1;
+        handle.setPointerCapture?.(event.pointerId);
+        const resize = (moveEvent) => {
+          moveEvent.preventDefault();
+          const deltaX = (moveEvent.clientX - startX) / state.zoom;
+          const deltaY = (moveEvent.clientY - startY) / state.zoom;
+          const widthDelta = Math.abs(deltaX) >= Math.abs(deltaY) ? deltaX : deltaY * aspect;
+          const nextWidth = Math.max(48, startWidth + widthDelta);
+          board.style.width = `${Math.round(nextWidth)}px`;
+          board.style.height = `${Math.round(nextWidth / aspect)}px`;
+          updateSelectionMenuPosition();
+        };
+        const finish = () => {
+          handle.removeEventListener("pointermove", resize);
+          handle.removeEventListener("pointerup", finish);
+          handle.removeEventListener("pointercancel", finish);
+          handle.releasePointerCapture?.(event.pointerId);
+        };
+        handle.addEventListener("pointermove", resize);
+        handle.addEventListener("pointerup", finish);
+        handle.addEventListener("pointercancel", finish);
+      });
+    }
+
+    function insertImageBoard(src, fileName, options = {}) {
+      state.boardCount += 1;
+      const board = document.createElement("article");
+      board.className = "board image-board";
+      board.dataset.board = `image-${state.boardCount}`;
+      board.tabIndex = 0;
+      board.style.width = "180px";
+      board.style.height = "180px";
+      board.style.left = `${18 + (state.boardCount % 4) * 13}%`;
+      board.style.top = `${24 + (state.boardCount % 3) * 11}%`;
+      board.innerHTML = `<small class="board-title"></small><img alt="导入的设计素材" draggable="false">`;
+      board.querySelector(".board-title").textContent = fileName;
+      const image = board.querySelector("img");
+      image.addEventListener("load", () => fitImageBoardToSource(board, image), { once: true });
+      image.src = src;
+      elements.canvas.appendChild(board);
+      bindBoard(board);
+      if (options.select !== false) selectBoard(board);
+      if (options.toast !== false) showToast("图片已加入画布");
+      return board;
+    }
+
+    function readImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener("load", () => resolve({ src: reader.result, name: file.name || "Clipboard image" }), { once: true });
+        reader.addEventListener("error", () => reject(reader.error || new Error("Image read failed")), { once: true });
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function importImageFiles(files) {
+      const imageFiles = [...files].filter((file) => file?.type?.startsWith("image/"));
+      if (!imageFiles.length) return [];
+      const sources = await Promise.all(imageFiles.map(readImageFile));
+      const boards = sources.map(({ src, name }) => insertImageBoard(src, name, { select: false, toast: false }));
+      setSelectedItems(boards, boards.at(-1));
+      showToast(`${boards.length} 张图片已加入画布`);
+      return boards;
+    }
+
+    function snapshotCanvasItem(item) {
+      return {
+        node: item.cloneNode(true),
+        left: item.offsetLeft,
+        top: item.offsetTop,
+        canvasData: item.querySelector("canvas")?.toDataURL() || null
+      };
+    }
+
+    function restoreSketchData(board, canvasData) {
+      const drawing = board.querySelector("canvas");
+      if (!drawing || !canvasData) return;
+      const image = new Image();
+      image.addEventListener("load", () => {
+        const context = drawing.getContext("2d");
+        context.clearRect(0, 0, drawing.width, drawing.height);
+        context.drawImage(image, 0, 0, drawing.width, drawing.height);
+      });
+      image.src = canvasData;
+    }
+
+    function pasteCanvasItem(snapshot, offset = 32) {
+      if (!snapshot?.node) return null;
+      const clone = snapshot.node.cloneNode(true);
+      clone.classList.remove("selected");
+      clone.dataset.board = `copy-${++state.boardCount}`;
+      clone.style.left = `${snapshot.left + offset}px`;
+      clone.style.top = `${snapshot.top + offset}px`;
+      elements.canvas.appendChild(clone);
+      bindSketchCanvas(clone);
+      bindBoard(clone);
+      restoreSketchData(clone, snapshot.canvasData);
+      return clone;
+    }
+
+    function giveCanvasInteractionPriority(board = state.selectedBoard) {
+      state.contextClipboardReady = false;
+      closeMentionMenu();
+      if (board?.isConnected) board.focus({ preventScroll: true });
+    }
+
+    function copySelectedBoard() {
+      const selected = getSelectedItems();
+      if (!selected.length) return false;
+      state.clipboardBoard = selected.map(snapshotCanvasItem);
+      state.clipboardPasteCount = 0;
+      giveCanvasInteractionPriority(state.selectedBoard || selected.at(-1));
+      showToast(`Copied ${selected.length} layer${selected.length === 1 ? "" : "s"}`);
+      return true;
+    }
+
+    function duplicateSelectedBoard() {
+      const selected = getSelectedItems();
+      if (!selected.length) return false;
+      const copies = selected.map((item) => pasteCanvasItem(snapshotCanvasItem(item)));
+      setSelectedItems(copies, copies.at(-1));
+      renderLayerPanel();
+      giveCanvasInteractionPriority(copies.at(-1));
+      return true;
+    }
+
+    function pasteCopiedBoard() {
+      if (!state.clipboardBoard.length) {
+        showToast("剪贴板中没有画布内容");
+        return false;
+      }
+      state.clipboardPasteCount += 1;
+      const copies = state.clipboardBoard.map((snapshot) => pasteCanvasItem(snapshot, 32 * state.clipboardPasteCount));
+      setSelectedItems(copies, copies.at(-1));
+      renderLayerPanel();
+      giveCanvasInteractionPriority(copies.at(-1));
+      showToast("已粘贴到画布");
+      return true;
+    }
+
+    function deleteSelectedBoard() {
+      const selected = getSelectedItems();
+      if (!selected.length) return false;
+      selected.forEach((item) => item.remove());
+      clearSelection();
+      elements.selectionMenu.style.transform = "translate3d(-9999px, -9999px, 0)";
+      showToast(`Deleted ${selected.length} layer${selected.length === 1 ? "" : "s"}`);
+      return true;
+    }
+
+    $$(".skill-chip").forEach((button) => button.addEventListener("click", () => selectSkill(button)));
+    $("#clearSkill").addEventListener("click", clearSkill);
+
+    $("#modeButton").addEventListener("click", (event) => {
+      event.stopPropagation();
+      elements.modelMenu.classList.remove("open");
+      elements.modeMenu.classList.toggle("open");
+    });
+
+    $$("#modeMenu button").forEach((button) => button.addEventListener("click", () => {
+      state.mode = button.dataset.mode;
+      $("#modeLabel").textContent = state.mode;
+      $$("#modeMenu button").forEach((item) => {
+        item.classList.toggle("active", item === button);
+        item.lastElementChild.textContent = item === button ? "✓" : "";
+      });
+      closeMenus();
+    }));
+
+    $("#modelButton").addEventListener("click", (event) => {
+      event.stopPropagation();
+      elements.modeMenu.classList.remove("open");
+      renderModels();
+      elements.modelMenu.classList.toggle("open");
+    });
+
+    $("#closeModel").addEventListener("click", closeMenus);
+    $$("#modelTabs button").forEach((button) => button.addEventListener("click", () => renderModels(button.dataset.category)));
+    elements.modelList.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-model]");
+      if (!button) return;
+      state.model = button.dataset.model;
+      if (state.model.startsWith("Agnes")) {
+        state.runtime = "agnes";
+        state.mode = button.dataset.category === "image" ? "图像" : button.dataset.category === "video" ? "视频" : "Agent";
+        $("#modeLabel").textContent = state.mode;
+      }
+      $("#modelLabel").textContent = state.model.length > 16 ? `${state.model.slice(0, 14)}…` : state.model;
+      closeMenus();
+    });
+
+    $("#sendButton").addEventListener("click", submitPrompt);
+    elements.prompt.addEventListener("keydown", (event) => {
+      if (elements.mentionMenu.classList.contains("open") && event.key === "Escape") {
+        event.preventDefault();
+        closeMentionMenu();
+        return;
+      }
+      if (elements.mentionMenu.classList.contains("open") && event.key === "Enter" && !event.shiftKey) {
+        const option = elements.mentionMenu.querySelector(".mention-option");
+        if (option) {
+          event.preventDefault();
+          chooseMentionLayer(getCanvasItems().find((board) => board.dataset.board === option.dataset.layerId));
+          return;
+        }
+      }
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        submitPrompt();
+      }
+    });
+
+    elements.prompt.addEventListener("input", () => {
+      state.contextClipboardReady = false;
+      const token = getMentionToken();
+      if (token) openMentionMenu(token.query);
+      else closeMentionMenu();
+    });
+
+    elements.mentionMenu.addEventListener("mousedown", (event) => event.preventDefault());
+    elements.mentionMenu.addEventListener("click", (event) => {
+      const option = event.target.closest("[data-layer-id]");
+      if (!option) return;
+      chooseMentionLayer(getCanvasItems().find((board) => board.dataset.board === option.dataset.layerId));
+    });
+    elements.promptContext.addEventListener("click", (event) => {
+      const chip = event.target.closest("[data-layer-id]");
+      if (!chip) return;
+      focusPromptForBoard(getCanvasItems().find((board) => board.dataset.board === chip.dataset.layerId), false);
+    });
+    elements.promptPreview.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-layer-id]");
+      if (!card) return;
+      focusPromptForBoard(getCanvasItems().find((board) => board.dataset.board === card.dataset.layerId), false);
+    });
+
+    $("#newChatButton").addEventListener("click", () => {
+      state.messages = [];
+      elements.messages.innerHTML = "";
+      clearSkill();
+      showToast("已开始新对话");
+    });
+
+    $("#historyButton").addEventListener("click", () => showToast(state.messages.length ? `当前对话已有 ${state.messages.length} 条消息` : "暂无历史对话"));
+    $("#collapseAgent").addEventListener("click", () => {
+      const collapsed = document.body.classList.toggle("agent-collapsed");
+      showToast(collapsed ? "Agent 已收起" : "Agent 已展开");
+    });
+
+    function updateAgnesSettingsVisibility() {
+      $("#agnesSettings").hidden = $("#agentRuntime").value !== "agnes";
+    }
+
+    $("#agentRuntime").addEventListener("change", updateAgnesSettingsVisibility);
+
+    $("#settingsButton").addEventListener("click", () => {
+      closeMenus();
+      $("#apiEndpoint").value = state.endpoint;
+      $("#apiProjectId").value = state.projectId;
+      $("#agentRuntime").value = state.runtime;
+      $("#agnesApiKey").value = state.agnesApiKey;
+      $("#agnesLanguageEndpoint").value = state.agnesEndpoints.agent;
+      $("#agnesImageEndpoint").value = state.agnesEndpoints.image;
+      $("#agnesVideoEndpoint").value = state.agnesEndpoints.video;
+      updateAgnesSettingsVisibility();
+      elements.settings.classList.add("open");
+    });
+
+    ["#closeSettings", "#cancelSettings"].forEach((id) => $(id).addEventListener("click", () => elements.settings.classList.remove("open")));
+    $("#saveSettings").addEventListener("click", () => {
+      state.endpoint = $("#apiEndpoint").value.trim() || "/api/agent";
+      state.projectId = $("#apiProjectId").value.trim() || "personal-design-01";
+      state.runtime = $("#agentRuntime").value;
+      state.agnesApiKey = $("#agnesApiKey").value.trim();
+      state.agnesEndpoints.agent = $("#agnesLanguageEndpoint").value.trim() || "https://apihub.agnes-ai.com/v1/chat/completions";
+      state.agnesEndpoints.image = $("#agnesImageEndpoint").value.trim() || "https://apihub.agnes-ai.com/v1/images/generations";
+      state.agnesEndpoints.video = $("#agnesVideoEndpoint").value.trim() || "https://apihub.agnes-ai.com/v1/videos";
+      writeSessionValue("personal-design.agnes-key", state.agnesApiKey);
+      writeSessionValue("personal-design.agnes-language-endpoint", state.agnesEndpoints.agent);
+      writeSessionValue("personal-design.agnes-image-endpoint", state.agnesEndpoints.image);
+      writeSessionValue("personal-design.agnes-video-endpoint", state.agnesEndpoints.video);
+      elements.settings.classList.remove("open");
+      showToast(state.runtime === "agnes" ? "Agnes AI 已连接到当前会话" : "API 设置已保存到当前会话");
+    });
+
+    $("#projectName").addEventListener("input", () => {
+      $("#saveState").textContent = "保存中…";
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(() => $("#saveState").textContent = "已保存", 600);
+    });
+
+    $("#shareButton").addEventListener("click", async () => {
+      try { await navigator.clipboard.writeText(location.href); showToast("页面链接已复制"); }
+      catch { showToast("当前浏览器未开放剪贴板权限"); }
+    });
+
+    $("#exportButton").addEventListener("click", () => showToast("已准备导出：PNG · 2 个画板"));
+    $("#accountButton").addEventListener("click", () => showToast("个人设计空间 · 本地 API 模式"));
+    $("#attachButton").addEventListener("click", () => $("#imageInput").click());
+    $("#imageInput").addEventListener("change", async (event) => {
+      const files = event.target.files;
+      if (!files?.length) return;
+      try {
+        const boards = await importImageFiles(files);
+        giveCanvasInteractionPriority(boards.at(-1));
+      }
+      catch (error) { showToast(`图片导入失败：${error.message}`); }
+      event.target.value = "";
+    });
+    $("#zoomReset").addEventListener("click", () => setZoom(1));
+    $("#zoomLabel").addEventListener("click", () => {
+      const steps = [.75, 1, 1.25];
+      const next = steps[(steps.findIndex((value) => Math.abs(value - state.zoom) < .01) + 1) % steps.length];
+      setZoom(next);
+    });
+    $("#layersButton").addEventListener("click", () => {
+      renderLayerPanel();
+      elements.layerPanel.classList.toggle("open");
+    });
+    elements.layerList.addEventListener("click", (event) => {
+      const row = event.target.closest("[data-layer-id]");
+      if (!row) return;
+      const item = getCanvasItems().find((board) => board.dataset.board === row.dataset.layerId);
+      if (!item) return;
+      const action = event.target.closest("[data-layer-action]")?.dataset.layerAction;
+      if (action) {
+        moveLayer(item, action === "up" ? 1 : -1);
+        return;
+      }
+      selectBoard(item, event.shiftKey);
+    });
+    $("#lockCanvas").addEventListener("click", () => {
+      state.canvasLocked = !state.canvasLocked;
+      useIcon($("#lockCanvas"), state.canvasLocked ? "lock" : "lockOpen");
+      $("#lockCanvas").dataset.tip = state.canvasLocked ? "解锁画布" : "锁定画布";
+      showToast(state.canvasLocked ? "画布已锁定" : "画布已解锁");
+    });
+    $("#fitCanvas").addEventListener("click", () => {
+      const fitZoom = Math.min(1.1, Math.max(MIN_ZOOM, elements.workspace.clientWidth / 1800));
+      setZoom(fitZoom);
+      showToast("已适配画布");
+    });
+    elements.workspace.addEventListener("wheel", (event) => {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      event.preventDefault();
+      const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
+      setZoomAt(state.zoom * factor, event.clientX, event.clientY);
+    }, { passive: false });
+
+    $$(".tool-button[data-tool]").forEach((button) => button.addEventListener("click", () => {
+      $$(".tool-button[data-tool]").forEach((item) => item.classList.remove("active"));
+      button.classList.add("active");
+      const tool = button.dataset.tool;
+      if (tool === "pin") addBlankBoard("pin");
+      if (tool === "image") $("#imageInput").click();
+      if (tool === "grid") {
+        elements.workspace.classList.toggle("grid-hidden");
+        showToast(elements.workspace.classList.contains("grid-hidden") ? "已隐藏网格" : "已显示网格");
+      }
+      if (tool === "shape") addBlankBoard("shape");
+      if (tool === "pen") addSketchBoard();
+      if (tool === "text") addBlankBoard("text");
+      if (tool === "generate-image") {
+        state.mode = "图像";
+        $("#modeLabel").textContent = state.mode;
+        elements.prompt.placeholder = "描述要生成的图片…";
+        elements.prompt.focus();
+      }
+      if (tool === "generate-video") {
+        state.mode = "视频";
+        $("#modeLabel").textContent = state.mode;
+        elements.prompt.placeholder = "描述镜头、运动与声音…";
+        elements.prompt.focus();
+      }
+      if (tool === "generate-text") {
+        state.mode = "Agent";
+        $("#modeLabel").textContent = state.mode;
+        elements.prompt.placeholder = "描述要生成的文案、标题或脚本…";
+        elements.prompt.focus();
+      }
+    }));
+
+    $("#duplicateBoard").addEventListener("click", () => {
+      duplicateSelectedBoard();
+    });
+
+    $("#bringForward").addEventListener("click", () => {
+      const selected = getSelectedItems();
+      if (!selected.length) return;
+      const topZ = Math.max(...getCanvasItems().map((board) => Number.parseInt(board.style.zIndex || "0", 10)), 0);
+      selected.forEach((board, index) => { board.style.zIndex = String(topZ + index + 1); });
+      renderLayerPanel();
+      showToast("Selected layers moved to front");
+    });
+
+    $("#lockBoard").addEventListener("click", () => {
+      const selected = getSelectedItems();
+      if (!selected.length) return;
+      const shouldLock = selected.some((board) => !board.classList.contains("locked"));
+      selected.forEach((board) => board.classList.toggle("locked", shouldLock));
+      const locked = state.selectedBoard?.classList.contains("locked");
+      useIcon($("#lockBoard"), locked ? "unlock" : "lock");
+      $("#lockBoard").dataset.tip = locked ? "Unlock" : "Lock";
+      renderLayerPanel();
+      showToast(shouldLock ? "Selected layers locked" : "Selected layers unlocked");
+    });
+
+    $("#deleteBoard").addEventListener("click", () => {
+      deleteSelectedBoard();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".menu") && !event.target.closest("#modeButton") && !event.target.closest("#modelButton")) closeMenus();
+      if (!event.target.closest(".composer-wrap")) closeMentionMenu();
+    });
+
+    function isEditingTarget(target) {
+      return target?.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target?.tagName);
+    }
+
+    document.addEventListener("paste", (event) => {
+      const imageFiles = [...(event.clipboardData?.items || [])]
+        .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+        .map((item) => item.getAsFile())
+        .filter(Boolean);
+      if (imageFiles.length) {
+        event.preventDefault();
+        importImageFiles(imageFiles)
+          .then((boards) => giveCanvasInteractionPriority(boards.at(-1)))
+          .catch((error) => showToast(`剪贴板图片导入失败：${error.message}`));
+        return;
+      }
+      if (isEditingTarget(document.activeElement)) return;
+      if (state.clipboardBoard.length) {
+        event.preventDefault();
+        pasteCopiedBoard();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const modifier = event.ctrlKey || event.metaKey;
+      const editing = isEditingTarget(document.activeElement);
+      const promptHasCollapsedSelection = document.activeElement === elements.prompt
+        && elements.prompt.selectionStart === elements.prompt.selectionEnd;
+      if (modifier && promptHasCollapsedSelection && state.contextClipboardReady && event.key.toLowerCase() === "c") {
+        event.preventDefault();
+        copySelectedBoard();
+        return;
+      }
+      if (modifier && promptHasCollapsedSelection && state.contextClipboardReady && event.key.toLowerCase() === "v" && state.clipboardBoard.length) {
+        event.preventDefault();
+        pasteCopiedBoard();
+        return;
+      }
+      if (modifier && !editing && event.key.toLowerCase() === "c") {
+        event.preventDefault();
+        copySelectedBoard();
+        return;
+      }
+      if (modifier && !editing && event.key.toLowerCase() === "d") {
+        event.preventDefault();
+        duplicateSelectedBoard();
+        return;
+      }
+      if (modifier && !editing && (event.code === "Equal" || event.key === "+")) {
+        event.preventDefault();
+        setZoomAt(state.zoom * 1.2);
+        return;
+      }
+      if (modifier && !editing && (event.code === "Minus" || event.key === "-" || event.key === "_")) {
+        event.preventDefault();
+        setZoomAt(state.zoom / 1.2);
+        return;
+      }
+      if (modifier && !editing && event.code === "Digit0") {
+        event.preventDefault();
+        state.panX = 0;
+        state.panY = 0;
+        setZoom(1);
+        return;
+      }
+      if (!editing && (event.key === "Delete" || event.key === "Backspace")) {
+        event.preventDefault();
+        deleteSelectedBoard();
+        return;
+      }
+      if (event.key.toLowerCase() === "c" && !modifier && !editing) elements.prompt.focus();
+      if (event.key === "Escape") {
+        closeMenus();
+        elements.settings.classList.remove("open");
+        elements.layerPanel.classList.remove("open");
+        if (!editing) clearSelection();
+      }
+    });
+
+    getCanvasItems().forEach(bindBoard);
+    bindCanvasPan();
+    bindMarqueeSelection();
+    window.addEventListener("resize", updateSelectionMenuPosition);
+    applyIcons();
+    renderMiniArt();
+    renderModels();
+    renderLayerPanel();
+    renderCanvasTransform();
+  </script>
+</body>
+</html>
